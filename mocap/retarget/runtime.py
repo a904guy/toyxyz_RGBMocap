@@ -4,7 +4,7 @@ from pathlib import Path
 from mocap.paths import ROOT
 
 def blender():
-    candidates=[Path(os.environ.get('RGBMOCAP_BLENDER',''))/'blender.exe',ROOT/'runtime_character/blender.exe']
+    candidates=[Path(os.environ.get('RGBMOCAP_BLENDER',''))/'blender.exe',ROOT/'runtime_character/blender.exe',ROOT/'runtime_character/blender']
     explicit=os.environ.get('RGBMOCAP_BLENDER')
     if explicit:candidates.insert(0,Path(explicit))
     found=shutil.which('blender')

@@ -27,6 +27,9 @@ https://github.com/user-attachments/assets/4c0b290b-4a65-4287-8d22-c63c96b3d080
 
 ## Install and run
 
+> **Linux:** this fork also runs on Linux. See [docs/LINUX.md](docs/LINUX.md) for
+> `python3 tools/setup_linux.py` and `./RGBMoCap.sh`. The steps below are for Windows.
+
 1. Install [Git for Windows](https://git-scm.com/download/win). Open **Command Prompt**
    in a writable folder where you want to install RGB MoCap, then clone the repository:
 

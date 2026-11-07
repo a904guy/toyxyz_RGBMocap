@@ -1,6 +1,6 @@
 """Optional finger-only HaMeR pass, isolated from FlowHMR's Python runtime."""
 from pathlib import Path
-import json,os,subprocess,uuid,zipfile
+import json,os,subprocess,sys,uuid,zipfile
 from .paths import ROOT,UPSTREAM
 
 MODEL_KEYS=('hand_hamer','hand_mean','mano_right')
@@ -66,8 +66,12 @@ def refine(project,output,emit):
         if session is not None:session.discard()
         import gc
         gc.collect();torch.cuda.empty_cache()
-        python=ROOT/'runtime_exmr/python.exe'
-        if not python.is_file():python=ROOT/'.venv-exmr/Scripts/python.exe'
+        if sys.platform!='win32':
+            from .posix_compat import venv_python
+            python=venv_python(ROOT/'.venv-exmr')
+        else:
+            python=ROOT/'runtime_exmr/python.exe'
+            if not python.is_file():python=ROOT/'.venv-exmr/Scripts/python.exe'
         if not python.is_file():raise RuntimeError('HaMeR needs the base ExMR runtime. Run install.cmd to repair it.')
         emit('info',message='FlowHMR HaMeR: every-frame fingers; ExMR crops and Gaussian smoothing. Body, wrists and trajectory are retained.')
         command=[str(python),'-I','-X','utf8',str(ROOT/'mocap/flow_hamer_entry.py'),str(project)]
@@ -177,4 +181,6 @@ def run(project,emit):
     load_hands(project,n)
     atomic_json(project/'flow_hamer_receipt.json',dict(identity=identity,output=file_stat(target)))
     emit('progress',current=n,total=n,phase='hamer',message='HaMeR finger smoothing complete')
-    emit('info',message=f'HaMeR finger pass: {time.monotonic()-started:.2f} s; peak allocated VRAM {torch.cuda.max_memory_allocated()/2**30:.2f} GiB; peak worker RAM {psutil.Process().memory_info().peak_wset/2**30:.2f} GiB.')
+    from .posix_compat import peak_rss
+    peak=peak_rss()
+    emit('info',message=f'HaMeR finger pass: {time.monotonic()-started:.2f} s; peak allocated VRAM {torch.cuda.max_memory_allocated()/2**30:.2f} GiB; peak worker RAM {peak/2**30:.2f} GiB.')

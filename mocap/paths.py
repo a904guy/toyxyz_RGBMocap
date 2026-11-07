@@ -7,7 +7,7 @@ from pathlib import Path
 ROOT = Path(sys.executable).resolve().parent if getattr(sys, "frozen", False) else Path(__file__).resolve().parents[1]
 HOME = Path(os.environ.get("RGB_MOCAP_DATA", ROOT)).resolve()
 MODELS = HOME / "models"
-PROJECTS = HOME / "projects"
+PROJECTS = HOME / "projects" if sys.platform == "win32" else (HOME / "projects").resolve()  # POSIX: follow a projects/ symlink once so derived paths agree
 UPSTREAM = ROOT / "third_party"
 COMPAT = ROOT / "native_compat"
 
@@ -19,5 +19,8 @@ def worker_command(stage: str, *args: str) -> list[str]:
     if stage.startswith('mamma_') and stage not in ('mamma_prepare','mamma_publish'):
         from .mamma_runtime import command as mamma_command
         return mamma_command(stage,args)
-    from .runtime_registry import command
+    if sys.platform != "win32":
+        from .posix_compat import command
+    else:
+        from .runtime_registry import command
     return command(ROOT, stage, args, frozen=bool(getattr(sys, "frozen", False)))

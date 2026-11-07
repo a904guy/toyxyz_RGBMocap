@@ -233,7 +233,8 @@ class CharacterWorkspace:
 
     def start_character_job(self,job):
         from .retarget.runtime import blender
-        from .runtime_registry import command
+        if sys.platform!='win32':from .posix_compat import command
+        else:from .runtime_registry import command
         try:
             if job['mode']!='adopt':blender()
             path=self.character_root/'characters'/('job-'+uuid.uuid4().hex+'.json');atomic_json(path,job)
@@ -306,6 +307,9 @@ class CharacterWorkspace:
         p=self.character_process
         if not p:return
         self.character_cancelled=True;self.character_line='Cancelling character job...'
+        if os.name!='nt':
+            from .posix_compat import kill_tree
+            kill_tree(p.processId());return
         helper=QProcess(self);self._character_killer=helper
         helper.start('taskkill',['/PID',str(p.processId()),'/T','/F'])
         helper.finished.connect(helper.deleteLater)

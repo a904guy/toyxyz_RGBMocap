@@ -106,3 +106,10 @@ third_party/**/.git/
 
 # Local temporary shader/kernel caches
 /temp/
+
+# Linux port: uv bootstrap, locally built native module, data-root symlinks (docs/LINUX.md)
+/.bootstrap/
+/third_party/KimodoMotionCorrection/bin/*.so
+/models
+/cache
+/projects
